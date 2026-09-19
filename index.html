@@ -444,7 +444,7 @@
   
   
   <aside class="notebook-left">
-    <!-- リング綴じ -->
+    
     <div class="binder-holes">
       <div class="ring-hole"></div>
       <div class="ring-hole"></div>
@@ -500,7 +500,7 @@
   
   <main class="notebook-right">
 
-    <!-- 01. 自己紹介 -->
+    
     <section id="about" class="page-section active">
       <div class="page-headline">
         <h2>01. 自己紹介 / Profile</h2>
@@ -537,7 +537,7 @@
       </p>
     </section>
 
-    <!-- 02. ゲームのこと -->
+    
     <section id="games" class="page-section">
       <div class="page-headline">
         <h2>02. ゲームのこと / Games</h2>
@@ -552,11 +552,11 @@
       
       <div class="drawing-box">
         <svg class="drawing-svg" viewBox="0 0 100 60">
-          <!-- ゲームパッド外枠 -->
+          
           <path class="draw-path" d="M25 15 C 35 15, 65 15, 75 15 C 88 15, 95 28, 88 48 C 84 55, 74 52, 70 42 C 65 30, 35 30, 30 42 C 26 52, 16 55, 12 48 C 5 28, 12 15, 25 15 Z" />
-          <!-- 十字キー -->
+          
           <path class="draw-path" d="M25 24 L25 34 M20 29 L30 29" />
-          <!-- ボタン -->
+          
           <circle class="draw-path" cx="72" cy="26" r="2.5" />
           <circle class="draw-path" cx="78" cy="30" r="2.5" />
           <circle class="draw-path" cx="72" cy="34" r="2.5" />
@@ -586,7 +586,7 @@
       </div>
     </section>
 
-    <!-- 03. バイクが好き -->
+    
     <section id="bikes" class="page-section">
       <div class="page-headline">
         <h2>03. バイクが好き / Motorcycle</h2>
@@ -599,15 +599,15 @@
       
       </p>
 
-      <!-- 手描きバイクのSVGアニメーション -->
+      
       <div class="drawing-box">
         <svg class="drawing-svg" viewBox="0 0 100 60">
-          <!-- タイヤ前後 -->
+          
           <circle class="draw-path" cx="22" cy="42" r="14" />
           <circle class="draw-path" cx="78" cy="42" r="14" />
-          <!-- フレーム・タンク・ハンドル -->
+          
           <path class="draw-path" d="M22 42 L42 38 L55 42 L78 42 M42 38 L38 22 L48 20 L58 32 L42 38 M48 20 L46 12 L38 12 M46 12 L54 12" />
-          <!-- シートとマフラー -->
+          
           <path class="draw-path" d="M48 24 L68 24 L78 35 M48 38 L72 45" />
         </svg>
         <div class="drawing-desc">
@@ -635,7 +635,7 @@
       </div>
     </section>
 
-    <!-- 04. やりたいこと -->
+    
     <section id="goals" class="page-section">
       <div class="page-headline">
         <h2>04. やりたいことリスト / Checklist</h2>
@@ -670,7 +670,7 @@
       </ul>
     </section>
 
-    <!-- 05. 落書きスペース -->
+   
     <section id="scratch" class="page-section">
       <div class="page-headline">
         <h2>05. 落書きスペース / Scratch Pad</h2>
@@ -709,7 +709,7 @@
       sections.forEach(sec => {
         if (sec.id === target) {
           sec.classList.add('active');
-          // SVGドローアニメーションをリスタート
+          
           const paths = sec.querySelectorAll('.draw-path');
           paths.forEach(p => {
             p.style.animation = 'none';
