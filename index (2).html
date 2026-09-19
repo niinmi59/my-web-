@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MY NOTEBOOK — 自分のノート</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Yomogi&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-paper: #fbfbf9;
+      --line-blue: #d6e2eb;
+      --line-red: #f0a8a8;
+      --ink: #1e1e1e;
+      --ink-gray: #555555;
+      --pencil: #777777;
+      --ring-metal: #2b2b2b;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #181818;
+      font-family: 'Yomogi', 'Zen Kaku Gothic New', sans-serif;
+      color: var(--ink);
+      user-select: none;
+      cursor: default;
+    }
+
+    
+    .notebook-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-paper);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.06);
+    }
+
+   
+    .notebook-left {
+      width: 280px;
+      min-width: 240px;
+      height: 100%;
+      background: #f4f3ef;
+      border-right: 3px double #2b2b2b;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 10;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+    }
+
+    
+    .binder-holes {
+      position: absolute;
+      right: -14px;
+      top: 0;
+      bottom: 0;
+      width: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      pointer-events: none;
+      z-index: 20;
+    }
+    .ring-hole {
+      width: 26px;
+      height: 14px;
+      background: #181818;
+      border-radius: 10px;
+      border: 3px solid #888;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(255,255,255,0.4);
+    }
+
+    .notebook-header {
+      padding: 35px 25px 20px;
+      border-bottom: 2px dashed #bbb;
+    }
+    .notebook-title {
+      font-family: 'Caveat', cursive;
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      line-height: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .notebook-title small {
+      font-size: 1rem;
+      font-family: 'Yomogi', cursive;
+      color: var(--ink-gray);
+    }
+    .notebook-subtitle {
+      font-size: 0.85rem;
+      color: var(--pencil);
+      margin-top: 6px;
+      letter-spacing: 1px;
+    }
+
+    
+    .nav-list {
+      list-style: none;
+      padding: 20px 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .nav-item {
+      padding: 14px 25px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.2s ease;
+      color: var(--ink-gray);
+      border-left: 5px solid transparent;
+    }
+    .nav-item:hover {
+      color: var(--ink);
+      background: rgba(0,0,0,0.03);
+      padding-left: 30px;
+    }
+    .nav-item.active {
+      color: var(--ink);
+      font-weight: bold;
+      background: #ece8df;
+      border-left: 5px solid #1a1a1a;
+    }
+    .nav-item .tag-num {
+      font-family: 'Caveat', cursive;
+      font-size: 1.2rem;
+      color: #999;
+    }
+    .nav-item.active .tag-num {
+      color: var(--ink);
+    }
+
+    
+    .left-footer {
+      padding: 20px 25px;
+      border-top: 1px solid #ddd;
+      font-size: 0.8rem;
+      color: var(--pencil);
+      line-height: 1.6;
+    }
+    .status-badge {
+      display: inline-block;
+      border: 1px solid #1a1a1a;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      margin-bottom: 6px;
+      border-radius: 2px;
+      transform: rotate(-2deg);
+      background: #fff;
+    }
+
+   
+    .notebook-right {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background-color: var(--bg-paper);
+      
+      background-image: 
+        linear-gradient(90deg, transparent 50px, var(--line-red) 50px, var(--line-red) 52px, transparent 52px),
+        repeating-linear-gradient(transparent, transparent 35px, var(--line-blue) 35px, var(--line-blue) 36px);
+      background-size: 100% 100%, 100% 36px;
+      background-attachment: local;
+      padding: 40px 60px 40px 80px;
+    }
+
+    
+    .page-section {
+      display: none;
+      animation: pageTurn 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+      min-height: calc(100vh - 80px);
+    }
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes pageTurn {
+      0% {
+        opacity: 0;
+        transform: translateX(30px) rotateY(-3deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg);
+      }
+    }
+
+   
+    .page-headline {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 8px;
+      margin-bottom: 30px;
+    }
+    .page-headline h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--ink);
+    }
+    .page-headline .date-stamp {
+      font-family: 'Caveat', cursive;
+      font-size: 1.4rem;
+      color: var(--pencil);
+    }
+
+    
+    .note-text {
+      font-size: 1.15rem;
+      line-height: 36px; 
+      color: var(--ink);
+      margin-bottom: 25px;
+      word-break: break-all;
+    }
+    .note-text strong {
+      border-bottom: 2px solid #111;
+      padding-bottom: 1px;
+    }
+    .note-marker {
+      background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.12) 60%);
+      padding: 0 4px;
+    }
+
+    
+    .horizontal-blocks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+      margin-bottom: 35px;
+    }
+    .memo-card {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      padding: 20px 22px;
+      box-shadow: 2px 3px 8px rgba(0,0,0,0.06);
+      position: relative;
+      transform: rotate(var(--rot, 0deg));
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .memo-card:hover {
+      transform: rotate(0deg) scale(1.02);
+      box-shadow: 4px 6px 16px rgba(0,0,0,0.12);
+      z-index: 5;
+    }
+    .memo-card.taped::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 18px;
+      background: rgba(220, 220, 210, 0.7);
+      border: 1px dashed rgba(0,0,0,0.2);
+    }
+    .memo-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 4px;
+    }
+    .memo-content {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--ink-gray);
+    }
+
+    
+    .drawing-box {
+      border: 1px dashed #999;
+      background: rgba(255,255,255,0.7);
+      padding: 20px;
+      margin: 25px 0;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      border-radius: 2px;
+    }
+    .drawing-svg {
+      width: 140px;
+      height: 90px;
+      stroke: #1a1a1a;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .draw-path {
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: drawLine 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+    .drawing-desc {
+      flex: 1;
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    
+    .todo-list {
+      list-style: none;
+      margin: 20px 0;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.1rem;
+      line-height: 36px;
+      cursor: pointer;
+      padding: 0 4px;
+      transition: color 0.2s;
+    }
+    .todo-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #222;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.15s;
+    }
+    .todo-item.checked .todo-checkbox {
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .todo-item.checked span.todo-text {
+      text-decoration: line-through;
+      color: #999;
+    }
+
+    
+    .canvas-container {
+      margin-top: 20px;
+      background: #fff;
+      border: 2px solid #333;
+      position: relative;
+    }
+    .canvas-toolbar {
+      background: #ece8df;
+      padding: 8px 15px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+    .canvas-btn {
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      padding: 4px 12px;
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .canvas-btn:hover {
+      background: #444;
+    }
+    #scratchCanvas {
+      width: 100%;
+      height: 220px;
+      display: block;
+      cursor: crosshair;
+      background: repeating-linear-gradient(transparent, transparent 35px, #e8edf0 35px, #e8edf0 36px);
+    }
+
+    
+    @media (max-width: 768px) {
+      .notebook-container {
+        flex-direction: column;
+        overflow-y: auto;
+      }
+      .notebook-left {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        border-right: none;
+        border-bottom: 3px double #2b2b2b;
+      }
+      .binder-holes {
+        display: none;
+      }
+      .nav-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px 15px;
+        gap: 8px;
+      }
+      .nav-item {
+        padding: 8px 14px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+      }
+      .nav-item.active {
+        border-left: none;
+        border-bottom: 3px solid #1a1a1a;
+      }
+      .notebook-right {
+        padding: 25px 20px 40px 30px;
+        background-size: 100% 100%, 100% 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="notebook-container">
+  
+  
+  <aside class="notebook-left">
+    <!-- リング綴じ -->
+    <div class="binder-holes">
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+      <div class="ring-hole"></div>
+    </div>
+
+    <div class="notebook-header">
+      <div class="notebook-title">
+        NOTEBOOK <small>自由なノート</small>
+      </div>
+      <div class="notebook-subtitle">計画表てきなサイト</div>
+    </div>
+
+    
+    <ul class="nav-list">
+      <li class="nav-item active" data-target="about">
+        <span>01. 自己紹介</span>
+        <span class="tag-num">ABOUT</span>
+      </li>
+      <li class="nav-item" data-target="games">
+        <span>02. ゲームのこと</span>
+        <span class="tag-num">GAMES</span>
+      </li>
+      <li class="nav-item" data-target="bikes">
+        <span>03. バイクが好き</span>
+        <span class="tag-num">BIKES</span>
+      </li>
+      <li class="nav-item" data-target="goals">
+        <span>04. やりたいこと</span>
+        <span class="tag-num">TODO</span>
+      </li>
+      <li class="nav-item" data-target="scratch">
+        <span>05. 落書きスペース</span>
+        <span class="tag-num">DRAW</span>
+      </li>
+    </ul>
+
+    <div class="left-footer">
+      <div class="status-badge">● NOW RECORDING</div>
+      <p>個人ノートです。<br>見出しをクリックしてページ移動。</p>
+    </div>
+  </aside>
+
+  
+  <main class="notebook-right">
+
+    <!-- 01. 自己紹介 -->
+    <section id="about" class="page-section active">
+      <div class="page-headline">
+        <h2>01. 自己紹介 / Profile</h2>
+        <div class="date-stamp">PAGE. 01</div>
+      </div>
+
+      <p class="note-text">
+        はじめまして<span class="note-marker">メモ帳みたいなwebサイト</span>です。<br>
+        特にないけど、<br>
+        <strong>部屋の机にあるノートのような場所</strong>にしたくて作りました。
+      </p>
+
+      <div class="horizontal-blocks">
+        <div class="memo-card taped" style="--rot: -1deg;">
+          <div class="memo-title">👤 自分について</div>
+          <div class="memo-content">
+            ・名前：奏太<br>
+            ・得意なこと：運動<br>
+            ・このサイトのこと：作ってみたかった<br>
+          </div>
+        </div>
+
+        <div class="memo-card taped" style="--rot: 1.2deg;">
+          <div class="memo-title">☕ 好きな時間</div>
+          <div class="memo-content">
+            ゲームで遊ぶ時間と、<br>
+            友達と遊んだりアニメを見ること
+          </div>
+        </div>
+      </div>
+
+      <p class="note-text">
+        左側の見出しをクリックすると、ゲームやバイクの話へページが切り替わります。
+      </p>
+    </section>
+
+    <!-- 02. ゲームのこと -->
+    <section id="games" class="page-section">
+      <div class="page-headline">
+        <h2>02. ゲームのこと / Games</h2>
+        <div class="date-stamp">PAGE. 02</div>
+      </div>
+
+      <p class="note-text">
+        一番長く続けている趣味。一人でやり込むゲームは苦手、フレンドと通話しながら遊ぶマルチしかできない<br>
+        ドーパミンが出てる時が一番熱いです。
+      </p>
+
+      
+      <div class="drawing-box">
+        <svg class="drawing-svg" viewBox="0 0 100 60">
+          <!-- ゲームパッド外枠 -->
+          <path class="draw-path" d="M25 15 C 35 15, 65 15, 75 15 C 88 15, 95 28, 88 48 C 84 55, 74 52, 70 42 C 65 30, 35 30, 30 42 C 26 52, 16 55, 12 48 C 5 28, 12 15, 25 15 Z" />
+          <!-- 十字キー -->
+          <path class="draw-path" d="M25 24 L25 34 M20 29 L30 29" />
+          <!-- ボタン -->
+          <circle class="draw-path" cx="72" cy="26" r="2.5" />
+          <circle class="draw-path" cx="78" cy="30" r="2.5" />
+          <circle class="draw-path" cx="72" cy="34" r="2.5" />
+          <circle class="draw-path" cx="66" cy="30" r="2.5" />
+        </svg>
+        <div class="drawing-desc">
+          <strong>ハマっているジャンル：</strong><br>
+          ・PCゲー<br>
+          ・フレンドとやるFPSが一番好き<br>
+          ・格闘ゲーに挑戦してみたい
+        </div>
+      </div>
+
+      <div class="horizontal-blocks">
+        <div class="memo-card" style="--rot: 0.8deg;">
+          <div class="memo-title">🔫APEX</div>
+          <div class="memo-content">
+            今一番やってるゲーム。
+          </div>
+        </div>
+        <div class="memo-card" style="--rot: -1.5deg;">
+          <div class="memo-title">📦 マイクラとかも</div>
+          <div class="memo-content">
+            元祖神ゲー。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03. バイクが好き -->
+    <section id="bikes" class="page-section">
+      <div class="page-headline">
+        <h2>03. バイクが好き / Motorcycle</h2>
+        <div class="date-stamp">PAGE. 03</div>
+      </div>
+
+      <p class="note-text">
+        <strong>まだ免許は持っていません！</strong><br>
+        でも街中を走る単車の排気音や、メカメカしいエンジン周りの造形が好きでずっと憧れています。<br>
+      
+      </p>
+
+      <!-- 手描きバイクのSVGアニメーション -->
+      <div class="drawing-box">
+        <svg class="drawing-svg" viewBox="0 0 100 60">
+          <!-- タイヤ前後 -->
+          <circle class="draw-path" cx="22" cy="42" r="14" />
+          <circle class="draw-path" cx="78" cy="42" r="14" />
+          <!-- フレーム・タンク・ハンドル -->
+          <path class="draw-path" d="M22 42 L42 38 L55 42 L78 42 M42 38 L38 22 L48 20 L58 32 L42 38 M48 20 L46 12 L38 12 M46 12 L54 12" />
+          <!-- シートとマフラー -->
+          <path class="draw-path" d="M48 24 L68 24 L78 35 M48 38 L72 45" />
+        </svg>
+        <div class="drawing-desc">
+          <strong>好きなスタイル：ネイキッド系</strong><br>
+          カウルで覆われていない、丸目一灯やメカがむき出しの武骨なスタイルが好き。<br>
+          CB400SFやゼファーカイχ将来買いたい
+        </div>
+      </div>
+
+      <div class="horizontal-blocks">
+        <div class="memo-card taped" style="--rot: -0.5deg;">
+          <div class="memo-title">🏍️ 免許取ったらやりたいこと</div>
+          <div class="memo-content">
+            とにかく海沿いの道をマイペースに走りたい。<br>
+            コンビニや道の駅にバイクを停めて飲む缶コーヒーが絶対美味いと思う。
+          </div>
+        </div>
+        <div class="memo-card taped" style="--rot: 1.5deg;">
+          <div class="memo-title">📺 行ってみたい場所</div>
+          <div class="memo-content">
+            横浜。<br>
+            スピード出してみたい。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04. やりたいこと -->
+    <section id="goals" class="page-section">
+      <div class="page-headline">
+        <h2>04. やりたいことリスト / Checklist</h2>
+        <div class="date-stamp">PAGE. 04</div>
+      </div>
+
+      <p class="note-text">
+        クリックすると鉛筆でチェック線が引けます。思いついたら随時追加していく予定。
+      </p>
+
+      <ul class="todo-list" id="todoList">
+        <li class="todo-item checked">
+          <div class="todo-checkbox">✓</div>
+          <span class="todo-text">白黒のノートみたいな自分のウェブサイトを作る（達成！）</span>
+        </li>
+        <li class="todo-item">
+          <div class="todo-checkbox"></div>
+          <span class="todo-text">教習所に通ってバイクの普通二輪免許を取得する</span>
+        </li>
+        <li class="todo-item">
+          <div class="todo-checkbox"></div>
+          <span class="todo-text">ヘルメットとグローブをお気に入りのやつで揃える</span>
+        </li>
+        <li class="todo-item">
+          <div class="todo-checkbox"></div>
+          <span class="todo-text">バイクで海まで初ツーリングに行って写真を撮る</span>
+        </li>
+        <li class="todo-item">
+          <div class="todo-checkbox"></div>
+          <span class="todo-text">高校を卒業する</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 05. 落書きスペース -->
+    <section id="scratch" class="page-section">
+      <div class="page-headline">
+        <h2>05. 落書きスペース / Scratch Pad</h2>
+        <div class="date-stamp">PAGE. 05</div>
+      </div>
+
+      <p class="note-text">
+        ノートの余白
+      </p>
+
+      <div class="canvas-container">
+        <div class="canvas-toolbar">
+          <span>✏️ </span>
+          <button class="canvas-btn" id="clearCanvas">クリアする</button>
+        </div>
+        <canvas id="scratchCanvas"></canvas>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<script>
+  
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.page-section');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.getAttribute('data-target');
+
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+
+      sections.forEach(sec => {
+        if (sec.id === target) {
+          sec.classList.add('active');
+          // SVGドローアニメーションをリスタート
+          const paths = sec.querySelectorAll('.draw-path');
+          paths.forEach(p => {
+            p.style.animation = 'none';
+            p.offsetHeight; /* trigger reflow */
+            p.style.animation = null;
+          });
+        } else {
+          sec.classList.remove('active');
+        }
+      });
+    });
+  });
+
+ 
+  const todoItems = document.querySelectorAll('.todo-item');
+  todoItems.forEach(item => {
+    item.addEventListener('click', () => {
+      item.classList.toggle('checked');
+      const box = item.querySelector('.todo-checkbox');
+      box.textContent = item.classList.contains('checked') ? '✓' : '';
+    });
+  });
+
+  
+  const canvas = document.getElementById('scratchCanvas');
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false;
+
+  function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = 220;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#1e1e1e';
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX || e.touches[0].clientX) - rect.left,
+      y: (e.clientY || e.touches[0].clientY) - rect.top
+    };
+  }
+
+  function startDraw(e) {
+    isDrawing = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  }
+
+  function stopDraw() {
+    isDrawing = false;
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
+  canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
+  canvas.addEventListener('touchend', stopDraw);
+
+  document.getElementById('clearCanvas').addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+</script>
+
+</body>
+</html>
